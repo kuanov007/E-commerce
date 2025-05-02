@@ -33,10 +33,12 @@ public class AdminUi {
                 setMainMenu(consumer, chatId);
             } else {
                 if (isClickAnyButton(text)) {
-                    ButtonNames clickedButton = ButtonNames.valueOf(text);
+                    ButtonNames clickedButton = getButtonNamesByText(text);
                     switch (clickedButton) {
                         case BACK -> {
-
+                            Storage.temporaryProductsForAdmin.remove(chatId);
+                            setMainMenu(consumer, chatId);
+                            return;
                         }
                         case ADD_PRODUCT -> {
                             consumer.accept(new SendMessage(String.valueOf(chatId), "Iltimos mahsulot nomini kiriting: "));
@@ -60,7 +62,9 @@ public class AdminUi {
                             Product product = Storage.temporaryProductsForAdmin.getOrDefault(chatId, new Product());
                             product.setName(text);
                             Storage.temporaryProductsForAdmin.put(chatId, product);
-                            consumer.accept(new SendMessage(String.valueOf(chatId), "Mahsulot narxini kiriting: "));
+                            SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "Mahsulot narxini kiriting: ");
+                            sendMessage.setReplyMarkup(ButtonService.setBackButton());
+                            consumer.accept(sendMessage);
                             adminState = ENTER_PRODUCT_PRICE;
                         }
                         case ENTER_PRODUCT_PRICE -> {
@@ -68,7 +72,9 @@ public class AdminUi {
                                 Product product = Storage.temporaryProductsForAdmin.getOrDefault(chatId, new Product());
                                 int price = Integer.parseInt(text);
                                 product.setPrice(price);
-                                consumer.accept(new SendMessage(String.valueOf(chatId), "Mahsulot soni kiriting: "));
+                                SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "Mahsulot soni kiriting: ");
+                                sendMessage.setReplyMarkup(ButtonService.setBackButton());
+                                consumer.accept(sendMessage);
 
                                 adminState = ENTER_PRODUCT_QUANTITY;
                             } catch (Exception e) {
@@ -80,7 +86,9 @@ public class AdminUi {
                                 Product product = Storage.temporaryProductsForAdmin.getOrDefault(chatId, new Product());
                                 int quantity = Integer.parseInt(text);
                                 product.setQuantity(quantity);
-                                consumer.accept(new SendMessage(String.valueOf(chatId), "Mahsulot suratini jo'nating: "));
+                                SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "Mahsulot suratini jo'nating: ");
+                                sendMessage.setReplyMarkup(ButtonService.setBackButton());
+                                consumer.accept(sendMessage);
 
                                 adminState = SET_PRODUCT_PHOTO;
                             } catch (Exception e) {
@@ -117,6 +125,17 @@ public class AdminUi {
         } else {
             consumer.accept(new SendMessage(String.valueOf(message.getChatId()), "Error: 404"));
         }
+    }
+
+    private static ButtonNames getButtonNamesByText(String text) {
+        ButtonNames[] values = ButtonNames.values();
+
+        for (ButtonNames value : values) {
+            if (value.getString().equals(text)) {
+                return value;
+            }
+        }
+        return null;
     }
 
     private static boolean isClickAnyButton(String text) {
