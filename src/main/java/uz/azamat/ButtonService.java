@@ -28,4 +28,18 @@ public interface ButtonService {
         replyKeyboardMarkup.setKeyboard(rows);
         return replyKeyboardMarkup;
     }
+
+    static ReplyKeyboardMarkup setBackButton() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        KeyboardRow firstRow = new KeyboardRow();
+        firstRow.add(ButtonNames.BACK.getString());
+
+        rows.add(firstRow);
+
+        replyKeyboardMarkup.setKeyboard(rows);
+        return replyKeyboardMarkup;
+    }
 }

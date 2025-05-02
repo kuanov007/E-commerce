@@ -22,11 +22,13 @@ public class AdminUi {
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals("/start")) {
+
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setText("Kerakli bo'limni tanlang:");
                 sendMessage.setChatId(chatId);
                 sendMessage.setReplyMarkup(ButtonService.getMainMenuButtonsForAdmin());
                 consumer.accept(sendMessage);
+
             }
         } else if (message.hasPhoto()) {
             List<PhotoSize> photos = message.getPhoto();
