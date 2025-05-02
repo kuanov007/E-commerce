@@ -14,19 +14,14 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("rawtypes")
 public class AdminUi {
-    public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Consumer<BotApiMethodMessage> consumer) {
+    public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Consumer<Object> consumer) {
 
     }
 
-    public static void getHandleMessage(Message message, Consumer<PartialBotApiMethod> consumer) {
+    public static void getHandleMessage(Message message, Consumer<Object> consumer) {
         Long chatId = message.getChatId();
         if (message.hasText()) {
-            String text = message.getText();
-            if(text.equals("/start")){
-                consumer.accept(new SendMessage(String.valueOf(chatId), "Admin"+message.getFrom().getUserName()));
-            }else{
 
-            }
         } else if (message.hasPhoto()) {
             List<PhotoSize> photos = message.getPhoto();
             String photoId = photos.get(photos.size() - 1).getFileId();

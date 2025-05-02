@@ -26,47 +26,34 @@ public class ECommerce extends TelegramLongPollingBot {
         if (update.hasCallbackQuery()) {
             CallbackQuery callbackQuery = update.getCallbackQuery();
             Long chatId = callbackQuery.getFrom().getId();
+
             if (isAdmin(chatId)) {
-                AdminUi.getHandleCallBackQuery(callbackQuery, botApiMethodMessage -> {
-                    try {
-                        execute(botApiMethodMessage);
-                    } catch (TelegramApiException e) {
-                        throw new RuntimeException(e);
-                    }
-                });
+                AdminUi.getHandleCallBackQuery(callbackQuery, this::executeObj);
                 return;
             }
-            UserUi.getHandleCallBackQuery(callbackQuery, botApiMethodMessage -> {
-                try {
-                    execute(botApiMethodMessage);
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+
+            UserUi.getHandleCallBackQuery(callbackQuery, this::executeObj);
         } else if (update.hasMessage()) {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
+
             if (isAdmin(chatId)) {
-                AdminUi.getHandleMessage(message, partialBotApiMethod -> {
-                    try {
-                        if (partialBotApiMethod instanceof SendPhoto sendPhoto) {
-                            execute(sendPhoto);
-                        } else if (partialBotApiMethod instanceof SendMessage sendMessage) {
-                            execute(sendMessage);
-                        }
-                    } catch (TelegramApiException e) {
-                        System.out.println("Exception otdi: ");
-                    }
-                });
+                AdminUi.getHandleMessage(message, this::executeObj);
                 return;
             }
-            UserUi.getHandleMessage(message, botApiMethodMessage -> {
-                try {
-                    execute(botApiMethodMessage);
-                } catch (TelegramApiException e) {
-                    throw new RuntimeException(e);
-                }
-            });
+
+            UserUi.getHandleMessage(message, this::executeObj);
+        }
+    }
+
+    private void executeObj(Object obj) {
+        try {
+            if (obj instanceof SendPhoto sendPhoto) {
+                execute(sendPhoto);
+            } else if (obj instanceof SendMessage sendMessage) {
+                execute(sendMessage);
+            }
+        } catch (TelegramApiException ignored) {
         }
     }
 
