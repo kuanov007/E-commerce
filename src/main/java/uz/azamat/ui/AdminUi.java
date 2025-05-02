@@ -1,7 +1,5 @@
 package uz.azamat.ui;
 
-import org.telegram.telegrambots.meta.api.methods.PartialBotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.botapimethods.BotApiMethodMessage;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -12,7 +10,6 @@ import uz.azamat.storage.Storage;
 import java.util.List;
 import java.util.function.Consumer;
 
-@SuppressWarnings("rawtypes")
 public class AdminUi {
     public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Consumer<Object> consumer) {
 
