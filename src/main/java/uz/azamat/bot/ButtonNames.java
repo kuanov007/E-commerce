@@ -9,6 +9,7 @@ public enum ButtonNames {
 
     //USER UCHUN
     BUY_PRODUCT("Buy product"),
+    SHOW_BASKET("Show basket"),
     HISTORY("History"),
 
     //IKKALASI UCHUN HAM

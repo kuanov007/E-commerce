@@ -26,6 +26,32 @@ public interface ButtonService {
         rows.add(secondRow);
 
         replyKeyboardMarkup.setKeyboard(rows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
+        return replyKeyboardMarkup;
+    }
+
+    static ReplyKeyboardMarkup getMainMenuButtonsForCustomer() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+
+        List<KeyboardRow> rows = new ArrayList<>();
+
+        KeyboardRow firstRow = new KeyboardRow();
+        KeyboardRow secondRow = new KeyboardRow();
+
+        firstRow.add(ButtonNames.BUY_PRODUCT.getString());
+        firstRow.add(ButtonNames.SHOW_BASKET.getString());
+
+        secondRow.add(ButtonNames.HISTORY.getString());
+
+        rows.add(firstRow);
+        rows.add(secondRow);
+
+        replyKeyboardMarkup.setKeyboard(rows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+
         return replyKeyboardMarkup;
     }
 
@@ -40,6 +66,8 @@ public interface ButtonService {
         rows.add(firstRow);
 
         replyKeyboardMarkup.setKeyboard(rows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
         return replyKeyboardMarkup;
     }
 }
