@@ -1,8 +1,12 @@
 package uz.azamat;
 
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import uz.azamat.bot.ButtonNames;
+import uz.azamat.product.Product;
+import uz.azamat.storage.Storage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,5 +73,28 @@ public interface ButtonService {
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setOneTimeKeyboard(true);
         return replyKeyboardMarkup;
+    }
+
+    static InlineKeyboardMarkup getInlineButtonsProductsByPage(int page) {
+        List<Product> productsSubList = Storage.getProductsSubList(page);
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+
+        List<List<InlineKeyboardButton>> rows = new ArrayList<>();
+        List<InlineKeyboardButton> row = new ArrayList<>();
+
+        for (int i = 0; i < productsSubList.size(); i++) {
+            if (i % 5 == 0) {
+                rows.add(row);
+                row = new ArrayList<>();
+            }
+
+            InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+            inlineKeyboardButton.setText(String.valueOf(i + 1));
+            inlineKeyboardButton.setCallbackData(String.valueOf(i + 1));
+            row.add(inlineKeyboardButton);
+        }
+        inlineKeyboardMarkup.setKeyboard(rows);
+        return inlineKeyboardMarkup;
     }
 }

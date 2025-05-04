@@ -4,9 +4,11 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import uz.azamat.ButtonService;
 import uz.azamat.bot.AdminStates;
 import uz.azamat.bot.ButtonNames;
+import uz.azamat.bot.History;
 import uz.azamat.product.Product;
 import uz.azamat.storage.Storage;
 
@@ -17,7 +19,6 @@ import java.util.function.Function;
 import static uz.azamat.bot.AdminStates.*;
 
 public class AdminUi {
-
     private static AdminStates adminState = null;
 
     public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Function<Object, Integer> function) {
@@ -52,8 +53,24 @@ public class AdminUi {
 
                         }
                         case SHOW_ALL_PRODUCT -> {
+                            String subString = Pagination.getSubString(1);
+                            InlineKeyboardMarkup inlineButtonsProductsByPage = ButtonService.getInlineButtonsProductsByPage(1);
+                            SendMessage sendMessage = new SendMessage();
 
+                            sendMessage.setChatId(chatId);
+                            sendMessage.setText(subString);
+                            sendMessage.setReplyMarkup(inlineButtonsProductsByPage);
+
+                            Integer messageId = function.apply(sendMessage);
+
+                            History history = new History();
+                            history.setUserChatId(chatId);
+                            history.setPage(1);
+                            history.setMessageId(messageId);
+
+                            Storage.histories.add(history);
                         }
+
                     }
                 }
                 if (adminState != null) {
