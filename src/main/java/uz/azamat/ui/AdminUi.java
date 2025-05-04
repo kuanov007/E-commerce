@@ -12,7 +12,7 @@ import uz.azamat.storage.Storage;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 import static uz.azamat.bot.AdminStates.*;
 
@@ -20,28 +20,28 @@ public class AdminUi {
 
     private static AdminStates adminState = null;
 
-    public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Consumer<Object> consumer) {
+    public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Function<Object, Integer> function) {
 
     }
 
-    public static void getHandleMessage(Message message, Consumer<Object> consumer) {
+    public static void getHandleMessage(Message message, Function<Object, Integer> function) {
         Long chatId = message.getChatId();
 
         if (message.hasText()) {
             String text = message.getText();
             if (text.equals("/start")) {
-                setMainMenu(consumer, chatId);
+                setMainMenu(function, chatId);
             } else {
                 if (isClickAnyButton(text)) {
                     ButtonNames clickedButton = getButtonNamesByText(text);
                     switch (clickedButton) {
                         case BACK -> {
                             Storage.temporaryProductsForAdmin.remove(chatId);
-                            setMainMenu(consumer, chatId);
+                            setMainMenu(function, chatId);
                             return;
                         }
                         case ADD_PRODUCT -> {
-                            consumer.accept(new SendMessage(String.valueOf(chatId), "Iltimos mahsulot nomini kiriting: "));
+                            function.apply(new SendMessage(String.valueOf(chatId), "Iltimos mahsulot nomini kiriting: "));
                             adminState = ENTER_PRODUCT_NAME;
                             return;
                         }
@@ -64,7 +64,7 @@ public class AdminUi {
                             Storage.temporaryProductsForAdmin.put(chatId, product);
                             SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "Mahsulot narxini kiriting: ");
                             sendMessage.setReplyMarkup(ButtonService.setBackButton());
-                            consumer.accept(sendMessage);
+                            function.apply(sendMessage);
                             adminState = ENTER_PRODUCT_PRICE;
                         }
                         case ENTER_PRODUCT_PRICE -> {
@@ -74,11 +74,10 @@ public class AdminUi {
                                 product.setPrice(price);
                                 SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "Mahsulot soni kiriting: ");
                                 sendMessage.setReplyMarkup(ButtonService.setBackButton());
-                                consumer.accept(sendMessage);
-
+                                function.apply(sendMessage);
                                 adminState = ENTER_PRODUCT_QUANTITY;
                             } catch (Exception e) {
-                                consumer.accept(new SendMessage(String.valueOf(chatId), "Iltimos narxni faqat raqam shaklida kiriting: "));
+                                function.apply(new SendMessage(String.valueOf(chatId), "Iltimos narxni faqat raqam shaklida kiriting: "));
                             }
                         }
                         case ENTER_PRODUCT_QUANTITY -> {
@@ -88,19 +87,19 @@ public class AdminUi {
                                 product.setQuantity(quantity);
                                 SendMessage sendMessage = new SendMessage(String.valueOf(chatId), "Mahsulot suratini jo'nating: ");
                                 sendMessage.setReplyMarkup(ButtonService.setBackButton());
-                                consumer.accept(sendMessage);
+                                function.apply(sendMessage);
 
                                 adminState = SET_PRODUCT_PHOTO;
                             } catch (Exception e) {
-                                consumer.accept(new SendMessage(String.valueOf(chatId), "Iltimos sonini faqat raqam shaklida kiriting: "));
+                                function.apply(new SendMessage(String.valueOf(chatId), "Iltimos sonini faqat raqam shaklida kiriting: "));
                             }
                         }
                         case SET_PRODUCT_PHOTO -> {
-                            consumer.accept(new SendMessage(String.valueOf(chatId), "Iltimos surat jo'nating!"));
+                            function.apply(new SendMessage(String.valueOf(chatId), "Iltimos surat jo'nating!"));
                         }
                     }
                 } else {
-                    consumer.accept(new SendMessage(String.valueOf(chatId), "Kerakli bo'limni tanlang: "));
+                    function.apply(new SendMessage(String.valueOf(chatId), "Kerakli bo'limni tanlang: "));
                 }
             }
         } else if (message.hasPhoto()) {
@@ -114,16 +113,16 @@ public class AdminUi {
                 product.setSold(true);
                 Storage.existingProducts.add(product);
                 Storage.temporaryProductsForAdmin.remove(chatId);
-                consumer.accept(new SendMessage(String.valueOf(message.getChatId()), "Mahsulot qo'shildi!"));
+                function.apply(new SendMessage(String.valueOf(message.getChatId()), "Mahsulot qo'shildi!"));
 
                 adminState = null;
 
-                setMainMenu(consumer, chatId);
+                setMainMenu(function, chatId);
             } else {
-                consumer.accept(new SendMessage(String.valueOf(chatId), "Error: 404"));
+                function.apply(new SendMessage(String.valueOf(chatId), "Error: 404"));
             }
         } else {
-            consumer.accept(new SendMessage(String.valueOf(message.getChatId()), "Error: 404"));
+            function.apply(new SendMessage(String.valueOf(message.getChatId()), "Error: 404"));
         }
     }
 
@@ -145,11 +144,11 @@ public class AdminUi {
         });
     }
 
-    private static void setMainMenu(Consumer<Object> consumer, Long chatId) {
+    private static void setMainMenu(Function<Object, Integer> function, Long chatId) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setText("Kerakli bo'limni tanlang:");
+        sendMessage.setText("Kerakli bo'limni tanlang: ");
         sendMessage.setChatId(chatId);
         sendMessage.setReplyMarkup(ButtonService.getMainMenuButtonsForAdmin());
-        consumer.accept(sendMessage);
+        function.apply(sendMessage);
     }
 }

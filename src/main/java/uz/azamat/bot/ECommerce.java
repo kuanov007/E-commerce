@@ -1,8 +1,7 @@
 package uz.azamat.bot;
 
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -11,10 +10,31 @@ import uz.azamat.ui.AdminUi;
 import uz.azamat.ui.UserUi;
 
 import java.util.ResourceBundle;
+import java.util.function.Function;
 
 public class ECommerce extends TelegramLongPollingBot {
     private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("settings");
     private final String username;
+    private final Function<Object, Integer> executeFlow = (object -> {
+        try {
+            if (object instanceof SendMessage sendMessage) {
+                return execute(sendMessage).getMessageId();
+            } else if (object instanceof SendPhoto sendPhoto) {
+                return execute(sendPhoto).getMessageId();
+            } else if (object instanceof SendVoice sendVoice) {
+                return execute(sendVoice).getMessageId();
+            } else if (object instanceof SendVideo sendVideo) {
+                return execute(sendVideo).getMessageId();
+            } else if (object instanceof SendAudio sendAudio) {
+                return execute(sendAudio).getMessageId();
+            } else if (object instanceof SendDocument sendDocument) {
+                return execute(sendDocument).getMessageId();
+            }
+            return null;
+        } catch (TelegramApiException e) {
+            throw new RuntimeException(e);
+        }
+    });
 
     public ECommerce(String botToken, String username) {
         super(botToken);
@@ -28,32 +48,21 @@ public class ECommerce extends TelegramLongPollingBot {
             Long chatId = callbackQuery.getFrom().getId();
 
             if (isAdmin(chatId)) {
-                AdminUi.getHandleCallBackQuery(callbackQuery, this::executeObj);
+                AdminUi.getHandleCallBackQuery(callbackQuery, executeFlow);
                 return;
             }
 
-            UserUi.getHandleCallBackQuery(callbackQuery, this::executeObj);
+            UserUi.getHandleCallBackQuery(callbackQuery, executeFlow);
         } else if (update.hasMessage()) {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
 
             if (isAdmin(chatId)) {
-                AdminUi.getHandleMessage(message, this::executeObj);
+                AdminUi.getHandleMessage(message, executeFlow);
                 return;
             }
 
-            UserUi.getHandleMessage(message, this::executeObj);
-        }
-    }
-
-    private void executeObj(Object obj) {
-        try {
-            if (obj instanceof SendPhoto sendPhoto) {
-                execute(sendPhoto);
-            } else if (obj instanceof SendMessage sendMessage) {
-                execute(sendMessage);
-            }
-        } catch (TelegramApiException ignored) {
+            UserUi.getHandleMessage(message, executeFlow);
         }
     }
 
