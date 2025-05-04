@@ -5,6 +5,7 @@ import uz.azamat.product.Product;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public interface Storage {
@@ -20,5 +21,16 @@ public interface Storage {
             return existingProducts.subList(start, Math.min(page * 10 - 1, existingProducts.size()));
         }
         return null;
+    }
+
+    static int getPage(Long userChatId, Integer messageId) {
+        Optional<History> first = histories.stream().filter(history -> {
+            return history.getUserChatId().equals(userChatId)
+                   && history.getMessageId().equals(messageId);
+        }).findFirst();
+        if (first.isPresent()) {
+            return first.get().getPage();
+        }
+        return -1;
     }
 }

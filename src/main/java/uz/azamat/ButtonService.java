@@ -94,7 +94,34 @@ public interface ButtonService {
             inlineKeyboardButton.setCallbackData(String.valueOf(i + 1));
             row.add(inlineKeyboardButton);
         }
+
+        List<InlineKeyboardButton> operationButtons = getInlineKeyboardButtons(page);
+        rows.add(operationButtons);
+
         inlineKeyboardMarkup.setKeyboard(rows);
         return inlineKeyboardMarkup;
     }
+
+    private static List<InlineKeyboardButton> getInlineKeyboardButtons(int page) {
+        List<InlineKeyboardButton> operationButtons = new ArrayList<>();
+
+        if (page > 1) {
+            InlineKeyboardButton previousButton = new InlineKeyboardButton();
+            previousButton.setText("Previous");
+            previousButton.setCallbackData("previous");
+            operationButtons.add(previousButton);
+        }
+        InlineKeyboardButton deleteButton = new InlineKeyboardButton();
+        deleteButton.setText("X");
+        deleteButton.setCallbackData("delete");
+        operationButtons.add(deleteButton);
+        if ((page + 1) * 10 - 1 < Storage.existingProducts.size()) {
+            InlineKeyboardButton nextButton = new InlineKeyboardButton();
+            nextButton.setText("Next");
+            nextButton.setCallbackData("next");
+            operationButtons.add(nextButton);
+        }
+        return operationButtons;
+    }
+
 }

@@ -1,7 +1,9 @@
 package uz.azamat.ui;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -22,7 +24,33 @@ public class AdminUi {
     private static AdminStates adminState = null;
 
     public static void getHandleCallBackQuery(CallbackQuery callbackQuery, Function<Object, Integer> function) {
+        Long userChatId = callbackQuery.getFrom().getId();
+        String data = callbackQuery.getData();
+        Integer messageId = callbackQuery.getMessage().getMessageId();
 
+        int page = Storage.getPage(userChatId, messageId);
+        try {
+            if (page != -1) {
+                List<Product> productsSubList = Storage.getProductsSubList(page);
+                if (productsSubList != null) {
+                    int index = Integer.parseInt(data);
+                    Product product = productsSubList.get(index);
+                    SendPhoto sendPhoto = new SendPhoto();
+                    sendPhoto.setChatId(userChatId);
+                    sendPhoto.setPhoto(new InputFile(product.getPhotoId()));
+                    sendPhoto.setCaption(getProductDetails(product));
+                    function.apply(sendPhoto);
+                }
+            }
+        } catch (NumberFormatException e) {
+
+        }
+    }
+
+    private static String getProductDetails(Product product) {
+        return "Nomi : " + product.getName() + "\n" +
+               "Narxi: " + product.getPrice() + "$\n" +
+               "Soni : " + product.getQuantity() + "\n";
     }
 
     public static void getHandleMessage(Message message, Function<Object, Integer> function) {
@@ -53,22 +81,29 @@ public class AdminUi {
 
                         }
                         case SHOW_ALL_PRODUCT -> {
-                            String subString = Pagination.getSubString(1);
-                            InlineKeyboardMarkup inlineButtonsProductsByPage = ButtonService.getInlineButtonsProductsByPage(1);
-                            SendMessage sendMessage = new SendMessage();
+                            if (Storage.getProductsSubList(1) != null) {
+                                String subString = Pagination.getSubString(1);
+                                InlineKeyboardMarkup inlineButtonsProductsByPage = ButtonService.getInlineButtonsProductsByPage(1);
+                                SendMessage sendMessage = new SendMessage();
 
-                            sendMessage.setChatId(chatId);
-                            sendMessage.setText(subString);
-                            sendMessage.setReplyMarkup(inlineButtonsProductsByPage);
+                                sendMessage.setChatId(chatId);
+                                sendMessage.setText(subString);
+                                sendMessage.setReplyMarkup(inlineButtonsProductsByPage);
 
-                            Integer messageId = function.apply(sendMessage);
+                                Integer messageId = function.apply(sendMessage);
 
-                            History history = new History();
-                            history.setUserChatId(chatId);
-                            history.setPage(1);
-                            history.setMessageId(messageId);
+                                History history = new History();
+                                history.setUserChatId(chatId);
+                                history.setPage(1);
+                                history.setMessageId(messageId);
 
-                            Storage.histories.add(history);
+                                Storage.histories.add(history);
+                            } else {
+                                SendMessage sendMessage = new SendMessage();
+                                sendMessage.setChatId(chatId);
+                                sendMessage.setText("Bizda hozircha mahsulotlar yo'q, iltimos keyinroq urunib ko'ring!");
+                                function.apply(sendMessage);
+                            }
                         }
 
                     }
